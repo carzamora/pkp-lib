@@ -3,8 +3,8 @@
 /**
  * @file plugins/importexport/users/filter/PKPUserUserXmlFilter.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPUserUserXmlFilter
@@ -119,7 +119,6 @@ class PKPUserUserXmlFilter extends NativeExportFilter {
 		$this->createOptionalNode($doc, $userNode, 'salutation', $user->getSalutation());
 		$this->createOptionalNode($doc, $userNode, 'initials', $user->getInitials());
 		$this->createOptionalNode($doc, $userNode, 'suffix', $user->getSuffix());
-		$this->createOptionalNode($doc, $userNode, 'gender', $user->getGender());
 		$this->createOptionalNode($doc, $userNode, 'date_registered', $user->getDateRegistered());
 		$this->createOptionalNode($doc, $userNode, 'date_last_login', $user->getDateLastLogin());
 		$this->createOptionalNode($doc, $userNode, 'date_last_email', $user->getDateLastEmail());

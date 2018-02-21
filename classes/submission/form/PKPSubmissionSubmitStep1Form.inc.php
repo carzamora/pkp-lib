@@ -3,8 +3,8 @@
 /**
  * @file classes/submission/form/PKPSubmissionSubmitStep1Form.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPSubmissionSubmitStep1Form
@@ -142,7 +142,7 @@ class PKPSubmissionSubmitStep1Form extends SubmissionSubmitForm {
 	 */
 	function readInputData() {
 		$vars = array(
-			'authorUserGroupId', 'locale', 'copyrightNoticeAgree', 'commentsToEditor', 'copyrightNoticeAgree'
+			'authorUserGroupId', 'locale', 'copyrightNoticeAgree', 'commentsToEditor',
 		);
 		foreach ((array) $this->context->getLocalizedSetting('submissionChecklist') as $key => $checklistItem) {
 			$vars[] = "checklist-$key";

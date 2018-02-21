@@ -7,8 +7,8 @@
 /**
  * @file classes/user/PKPUser.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPUser
@@ -102,22 +102,6 @@ class PKPUser extends Identity {
 	}
 
 	/**
-	 * Get user gender.
-	 * @return string
-	 */
-	function getGender() {
-		return $this->getData('gender');
-	}
-
-	/**
-	 * Set user gender.
-	 * @param $gender string
-	 */
-	function setGender($gender) {
-		$this->setData('gender', $gender);
-	}
-
-	/**
 	 * Get phone number.
 	 * @return string
 	 */
@@ -163,17 +147,6 @@ class PKPUser extends Identity {
 	 */
 	function setBillingAddress($billingAddress) {
 		$this->setData('billingAddress', $billingAddress);
-	}
-
-	/**
-	 * Get the user's reviewing interests as an array. DEPRECATED in favour of direct interaction with the InterestManager.
-	 * @return array
-	 */
-	function getUserInterests() {
-		if (Config::getVar('debug', 'deprecation_warnings')) trigger_error('Deprecated function.');
-		import('lib.pkp.classes.user.InterestManager');
-		$interestManager = new InterestManager();
-		return $interestManager->getInterestsForUser($this);
 	}
 
 	/**

@@ -3,8 +3,8 @@
 /**
  * @file classes/core/APIRouter.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2016 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class APIRouter
@@ -119,19 +119,8 @@ class APIRouter extends PKPRouter {
 	}
 
 	/**
-	 * Generate a URL into the API.
-	 * FIXME: Unimplemented.
-	 * @param $request PKPRequest
-	 * @param $endpoing string API endpoint
-	 * @param $params array
-	 */
-	function url($request, $endpoint, $params) {
-		fatalError('unimplemented.');
-	}
-
-	/**
 	 * Get the requested operation
-	 * 
+	 *
 	 * @param $request PKPRequest
 	 * @return string
 	 */

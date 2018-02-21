@@ -1,13 +1,13 @@
 <?php
+
 /**
  * @defgroup submission_reviewRound Review Round
  */
-
 /**
  * @file classes/submission/reviewRound/ReviewRound.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class ReviewRound
@@ -16,11 +16,10 @@
  *
  * @brief Basic class describing a review round.
  */
-
 // The first four statuses are set explicitly by EditorDecisions, which override
 // the current status.
 define('REVIEW_ROUND_STATUS_REVISIONS_REQUESTED', 1);
-define('REVIEW_ROUND_STATUS_RESUBMITTED', 2);
+define('REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW', 2);
 define('REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL', 3);
 define('REVIEW_ROUND_STATUS_ACCEPTED', 4);
 define('REVIEW_ROUND_STATUS_DECLINED', 5);
@@ -32,10 +31,19 @@ define('REVIEW_ROUND_STATUS_PENDING_REVIEWS', 7); // Waiting for reviews to be s
 define('REVIEW_ROUND_STATUS_REVIEWS_READY', 8); // One or more reviews is ready for an editor to view
 define('REVIEW_ROUND_STATUS_REVIEWS_COMPLETED', 9); // All assigned reviews have been confirmed by an editor
 define('REVIEW_ROUND_STATUS_REVIEWS_OVERDUE', 10); // One or more reviews is overdue
-
-// The following status is calculated when the round is in revisions and at
+// The following status is calculated when the round is in REVIEW_ROUND_STATUS_REVISIONS_REQUESTED and
 // at least one revision file has been uploaded.
 define('REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED', 11);
+
+// The following statuses are calculated based on the statuses of recommendOnly EditorAssignments
+// and their decisions in this round.
+define('REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS', 12); // Waiting for recommendations to be submitted by recommendOnly editors
+define('REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY', 13); // One or more recommendations are ready for an editor to view
+define('REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED', 14); // All assigned recommendOnly editors have made a recommendation
+
+// The following status is calculated when the round is in REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW and
+// at least one revision file has been uploaded.
+define('REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED', 15);
 
 class ReviewRound extends DataObject {
 
@@ -118,6 +126,7 @@ class ReviewRound extends DataObject {
 	 * @return int
 	 */
 	public function determineStatus() {
+		import('lib.pkp.classes.submission.SubmissionFile'); // Submission file constants
 
 		// Check if revisions requested or received, if this is latest review round and then check files
 		$roundStatus = $this->getStatus();
@@ -133,12 +142,19 @@ class ReviewRound extends DataObject {
 			return REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED;
 		}
 
-		// Leave the status alone if it is set to one of the EditorDecisions
-		// which have advanced the submission beyond this round
+		// If revisions have been requested for re-submission, check to see if any have been
+		// submitted
+		if ($this->getStatus() == REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW || $this->getStatus() == REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED) {
+			$submissionFileDao = DAORegistry::getDAO('SubmissionFileDAO');
+			$submissionFiles = $submissionFileDao->getRevisionsByReviewRound($this, SUBMISSION_FILE_REVIEW_REVISION);
+			if (empty($submissionFiles)) {
+				return REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW;
+			}
+			return REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED;
+		}
+
 		$statusFinished = in_array(
-			$this->getStatus(),
-			array(
-				REVIEW_ROUND_STATUS_RESUBMITTED,
+			$this->getStatus(), array(
 				REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL,
 				REVIEW_ROUND_STATUS_ACCEPTED,
 				REVIEW_ROUND_STATUS_DECLINED
@@ -146,6 +162,34 @@ class ReviewRound extends DataObject {
 		);
 		if ($statusFinished) {
 			return $this->getStatus();
+		}
+
+		// Determine the round status by looking at the recommendOnly editor assignment statuses
+		$stageAssignmentDao = DAORegistry::getDAO('StageAssignmentDAO');
+		$editDecisionDao = DAORegistry::getDAO('EditDecisionDAO');
+		$pendingRecommendations = false;
+		$recommendationsFinished = true;
+		$recommendationsReady = false;
+		$editorsStageAssignments = $stageAssignmentDao->getEditorsAssignedToStage($this->getSubmissionId(), $this->getStageId());
+		foreach ($editorsStageAssignments as $editorsStageAssignment) {
+			if ($editorsStageAssignment->getRecommendOnly()) {
+				$pendingRecommendations = true;
+				// Get recommendation from the assigned recommendOnly editor
+				$editorId = $editorsStageAssignment->getUserId();
+				$editorRecommendations = $editDecisionDao->getEditorDecisions($this->getSubmissionId(), $this->getStageId(), $this->getRound(), $editorId);
+				if (empty($editorRecommendations)) {
+					$recommendationsFinished = false;
+				} else {
+					$recommendationsReady = true;
+				}
+			}
+		}
+		if ($pendingRecommendations) {
+			if ($recommendationsFinished) {
+				return REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED;
+			} elseif ($recommendationsReady) {
+				return REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY;
+			}
 		}
 
 		// Determine the round status by looking at the assignment statuses
@@ -191,6 +235,8 @@ class ReviewRound extends DataObject {
 			return REVIEW_ROUND_STATUS_REVIEWS_READY;
 		} elseif ($anyIncompletedReview) {
 			return REVIEW_ROUND_STATUS_PENDING_REVIEWS;
+		} elseif ($pendingRecommendations) {
+			return REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS;
 		}
 		return REVIEW_ROUND_STATUS_REVIEWS_COMPLETED;
 	}
@@ -201,13 +247,15 @@ class ReviewRound extends DataObject {
 	 * @return int
 	 */
 	function getStatusKey($isAuthor = false) {
-		switch ($this->getStatus()) {
+		switch ($this->determineStatus()) {
 			case REVIEW_ROUND_STATUS_REVISIONS_REQUESTED:
 				return 'editor.submission.roundStatus.revisionsRequested';
 			case REVIEW_ROUND_STATUS_REVISIONS_SUBMITTED:
 				return 'editor.submission.roundStatus.revisionsSubmitted';
-			case REVIEW_ROUND_STATUS_RESUBMITTED:
-				return 'editor.submission.roundStatus.resubmitted';
+			case REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW:
+				return 'editor.submission.roundStatus.resubmitForReview';
+			case REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW_SUBMITTED:
+				return 'editor.submission.roundStatus.submissionResubmitted';
 			case REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL:
 				return 'editor.submission.roundStatus.sentToExternal';
 			case REVIEW_ROUND_STATUS_ACCEPTED:
@@ -219,14 +267,21 @@ class ReviewRound extends DataObject {
 			case REVIEW_ROUND_STATUS_PENDING_REVIEWS:
 				return 'editor.submission.roundStatus.pendingReviews';
 			case REVIEW_ROUND_STATUS_REVIEWS_READY:
-				return $isAuthor?'author.submission.roundStatus.reviewsReady':'editor.submission.roundStatus.reviewsReady';
+				return $isAuthor ? 'author.submission.roundStatus.reviewsReady' : 'editor.submission.roundStatus.reviewsReady';
 			case REVIEW_ROUND_STATUS_REVIEWS_COMPLETED:
 				return 'editor.submission.roundStatus.reviewsCompleted';
 			case REVIEW_ROUND_STATUS_REVIEWS_OVERDUE:
 				return 'editor.submission.roundStatus.reviewOverdue';
+			case REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS:
+				return 'editor.submission.roundStatus.pendingRecommendations';
+			case REVIEW_ROUND_STATUS_RECOMMENDATIONS_READY:
+				return 'editor.submission.roundStatus.recommendationsReady';
+			case REVIEW_ROUND_STATUS_RECOMMENDATIONS_COMPLETED:
+				return 'editor.submission.roundStatus.recommendationsCompleted';
 			default: return null;
 		}
 	}
+
 }
 
 ?>

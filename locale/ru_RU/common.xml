@@ -4,8 +4,8 @@
 <!--
   * locale/ru_RU/common.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings for the ru_RU (Русский) locale.
@@ -147,12 +147,14 @@
 	<message key="common.fullscreenOff">Выйти из полноэкранного режима</message>
 	<message key="common.false">Ложь</message>
 	<message key="common.file">Файл</message>
-	<message key="common.file.namingPattern">{$username}, {$userGroup}, {$originalFilename}</message>
-	<message key="common.file.anonymousNamingPattern">{$userGroup}, {$originalFilename}</message>
+	<message key="common.file.namingPattern">{$username}, {$originalFilename}</message>
+	<message key="common.file.anonymousNamingPattern">{$genre}, {$originalFilename}</message>
 	<message key="common.fileName">Имя файла</message>
 	<message key="common.fileSize">Размер файла</message>
 	<message key="common.fileType">Тип файла</message>
 	<message key="common.fileUploaderError">Загружается загрузчик файлов в систему. Если он не появляется, скорее всего его запуск не поддерживается этим браузером. Пожалуйста, свяжитесь с администратором сервера для решения проблемы.</message>
+	<message key="common.from">C</message>
+	<message key="common.until">По</message>
 	<message key="common.go">Выполнить</message>
 	<message key="common.height">Высота</message>
 	<message key="common.homepageNavigationLabel">Главная</message>
@@ -197,6 +199,8 @@
 	<message key="common.or">или</message>
 	<message key="common.other">Прочее</message>
 	<message key="common.overdue">Просрочено</message>
+	<message key="common.pagination">{$start}-{$end} из {$total}</message>
+	<message key="common.pagination.label">Просмотреть другие страницы</message>
 	<message key="common.pageNumber">Страница {$pageNumber}</message>
 	<message key="common.pageHeaderLogo.altText">Логотип верхнего колонтитула страницы</message>
 	<message key="common.percentage">{$percentage}%</message>
@@ -370,15 +374,20 @@
 
 	<!-- Участники этапа -->
 	<message key="stageParticipants.history.messageSent">Уведомление отправлено пользователям.</message>
+	<message key="stageParticipants.notify.startDiscussion">Начать обсуждение</message>
+	<message key="stageParticipants.notify.startDiscussion.description">Начать обсуждение между вами и {$userFullName}.</message>
 	<message key="stageParticipants.notify.chooseMessage">Выберите стандартное сообщение для использования или заполните форму ниже.</message>
 	<message key="stageParticipants.notify.message">Сообщение</message>
 	<message key="stageParticipants.notify.warning">Пожалуйста, убедитесь, что вы заполнили поле сообщения и выбрали хотя бы одного получателя.</message>
+	<message key="stageParticipants.options">Назначенные права</message>
+	<message key="stageParticipants.recommendOnly">Этому участнику разрешено только рекомендовать решение редакции, запись решения редакции требует участия редактора с соответствующими правами.</message>
 
 	<message key="locale.primary">Основной язык</message>
 	<message key="locale.supported">Поддерживаемые языки</message>
 	<message key="navigation.access"><![CDATA[Пользователи и роли]]></message>
 	<message key="navigation.about">О нас</message>
 	<message key="navigation.admin">Администрирование</message>
+	<message key="navigation.archives">Архивы</message>
 	<message key="navigation.breadcrumbLabel">Вы здесь:</message>
 	<message key="navigation.breadcrumbSeparator">/</message>
 	<message key="navigation.tools">Инструменты</message>
@@ -432,7 +441,6 @@
 	<message key="notification.editedAuthor">Автор отредактирован.</message>
 	<message key="notification.confirmError">При подверждении вашей подписки возникла ошибка.</message>
 	<message key="notification.confirmSuccess">Вы были успешно подписаны.</message>
-	<message key="notification.email">Не отправлять мне письмо по электронной почте для следующих типов уведомлений.</message>
 	<message key="notification.location">Перейти по ссылке</message>
 	<message key="notification.mailList">Список рассылки уведомлений</message>
 	<message key="notification.mailList.emailInvalid">Пожалуйста, введите правильный адрес электронной почты.</message>
@@ -462,6 +470,7 @@
 	<message key="notification.unsubscribeError">При отмене Вашей подписки произошла ошибка. Пожалуйста, убедитесь, что вы используете правильный URL-адрес как указано в уведомлении, пришедшем на Ваш адрес электронной почты.</message>
 	<message key="notification.unsubscribeSuccess">Ваша подписка успешно прекращена.</message>
 	<message key="notification.savedSubmissionMetadata">Сохранены метаданные материала.</message>
+	<message key="notification.sendNotificationConfirmation">Отправить уведомление электронной почтой всем зарегистрированным пользователям</message>
 	<message key="search.author">По автору</message>
 	<message key="search.abstract">Аннотация</message>
 	<message key="search.advancedFilters">Расширенные фильтры</message>
@@ -538,12 +547,21 @@
 	<message key="user.authorization.submissionFile">Данному пользователю не разрешен доступ к файлу указанного материала.</message>
 	<message key="user.authorization.invalidSubmission">Неправильный материал.</message>
 	<message key="user.authorization.invalidRepresentation">Неправильное представление.</message>
-	<message key="navigation.archives">Архивы</message>
 	<message key="user.authorization.authorRoleMissing">В данный момент у Вас не достаточно прав для просмотра материала. Пожалуйста, отредактируйте ваш профиль, чтобы убедиться в том, что Вам предоставлены соответствующие роли в разделе «Регистрация как».</message>
 	<message key="user.authorization.submissionAuthor">Данный пользователь не является автором запрошенного материала. Пожалуйста, проверьте, что вы вошли в систему с правильной учетной записью пользователя.</message>
 	<message key="notification.type.queryActivity">Активность обсуждений.</message>
 	<message key="notification.type.queryAdded">Добавлено обсуждение.</message>
-	<message key="notification.type.assignCopyeditors">Назначьте литературного редактора, используя ссылку «Добавить» в списке «Участники».</message>
+	<message key="notification.type.assignCopyeditors">Назначьте литературного редактора, используя ссылку «Назначить» в списке «Участники».</message>
 	<message key="notification.type.awaitingCopyedits">Ожидание литературного редактирование.</message>
 	<message key="notification.type.roundStatusTitle">Статус раунда {$round}</message>
+
+	<message key="semicolon">{$label}:</message>
+
+	<!-- Меню навигации -->
+	<message key="notification.editedNavigationMenuItem">Элемент меню навигации был успешно обновлен</message>
+	<message key="notification.removedNavigationMenuItem">Элемент меню навигации был успешно удален</message>
+	<message key="notification.addedNavigationMenuItem">Элемент меню навигации был успешно добавлен</message>
+	<message key="notification.addedNavigationMenu">Меню навигации было успешно добавлено</message>
+	<message key="notification.editedNavigationMenu">Меню навигации было успешно обновлено</message>
+	<message key="notification.removedNavigationMenu">Меню навигации было успешно удалено</message>
 </locale>

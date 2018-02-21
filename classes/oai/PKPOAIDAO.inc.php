@@ -3,8 +3,8 @@
 /**
  * @file classes/oai/PKPOAIDAO.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPOAIDAO
@@ -192,7 +192,7 @@ abstract class PKPOAIDAO extends DAO {
 		if ($result->RecordCount() != 0) {
 			$row = $result->GetRowAssoc(false);
 			$record = $this->_returnRecordFromRow($row);
-			$datestamp = OAIUtils::UTCtoTimestamp($record->datestamp, false);
+			$datestamp = OAIUtils::UTCtoTimestamp($record->datestamp);
 		} else {
 			$datestamp = 0;
 		}

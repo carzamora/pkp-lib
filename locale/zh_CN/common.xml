@@ -4,8 +4,8 @@
 <!--
   * locale/zh_CN/common.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings for the en_US (English) locale.
@@ -100,8 +100,8 @@
 	<message key="common.fileName">文件名</message>
 	<message key="common.fileSize">文件大小</message>
 	<message key="common.fileType">文件类型</message>
-	<message key="common.file.namingPattern">{$username}, {$userGroup}, {$originalFilename}</message>
-	<message key="common.file.anonymousNamingPattern">{$userGroup}, {$originalFilename}</message>
+	<message key="common.file.namingPattern">{$username}, {$originalFilename}</message>
+	<message key="common.file.anonymousNamingPattern">{$genre}, {$originalFilename}</message>
 	<message key="common.height">高度</message>
 	<message key="common.homePageHeaderLogo.altText">首页头部Logo</message>
 	<message key="common.hour">小时</message>
@@ -266,7 +266,6 @@
 	<message key="notification.allow">允许这些类型的通知出现在我的通知Feed.</message>
 	<message key="notification.confirmError">确认您的订阅的时候发生一个错误.</message>
 	<message key="notification.confirmSuccess">Y您已成功订阅.</message>
-	<message key="notification.email">发送给我的一封关于这种类型通知的电子邮件.</message>
 	<message key="notification.location">跳转到URL</message>
 	<message key="notification.mailList">通知的邮件列表</message>
 	<message key="notification.mailList.emailInvalid">请输入一个有效的电子邮件地址.</message>
@@ -368,4 +367,6 @@
 	<message key="common.notified">通知的</message>
 	<message key="common.reset">重置</message>
 	<message key="common.acknowledged">已确认</message>
+
+	<message key="semicolon">{$label}:</message>
 </locale>

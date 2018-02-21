@@ -4,8 +4,8 @@
 <!--
   * locale/ru_RU/user.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings for the ru_RU (Русский) locale.
@@ -36,9 +36,7 @@
 	<message key="user.dateRegistered">Дата регистрации</message>
 	<message key="user.editMyProfile">Редактировать мой профиль</message>
 	<message key="user.email">Адрес (E-mail)</message>
-	<message key="user.feminine">Ж</message>
 	<message key="user.firstName">Имя</message>
-	<message key="user.gender">Пол</message>
 	<message key="user.initialsExample">Алексей Алексеевич Бородин = ААБ</message>
 	<message key="user.initials">Инициалы</message>
 	<message key="user.interests">Интересы как рецензента</message>
@@ -73,11 +71,9 @@
 	<message key="user.logOutAs">Выйти из системы как</message>
 	<message key="user.hello">Добро пожаловать, </message>
 	<message key="user.mailingAddress">Почтовый адрес</message>
-	<message key="user.masculine">М</message>
 	<message key="user.middleName">Отчество</message>
 	<message key="user.myAccount">Мой профиль</message>
 	<message key="user.name">Фамилия</message>
-	<message key="user.other">Иное</message>
 	<message key="user.password">Пароль</message>
 	<message key="user.repeatPassword">Повторите пароль</message>
 	<message key="user.phone">Телефон</message>
@@ -120,6 +116,7 @@
 	<message key="user.register">Регистрация</message>
 	<message key="user.register.usernameRestriction">Имя пользователя должно содержать только строчные латинские буквы, цифры и дефисы/подчеркивания.</message>
 	<message key="user.register.registrationCompleted"><![CDATA[Вы успешно зарегистрировались. <a href="{$profileUrl}">Щелкните здесь</a>, чтобы заполнить свой профиль пользователя.]]></message>
+	<message key="user.role.assistant">Ассистент</message>
 	<message key="user.role.author">Автор</message>
 	<message key="user.role.author_s">Автор(ы)</message>
 	<message key="user.role.authors">Авторы</message>
@@ -157,4 +154,5 @@
 	<message key="user.apiKeyEnabled">Разрешить внешним приложениям с ключом API доступ к этой учетной записи</message>
 	<message key="user.apiKey.generate">Сгенерировать новый ключ API</message>
 	<message key="user.apiKey.generateWarning">Генерирование нового ключа API сделает недействительным любой уже существующий ключ для этого пользователя.</message>
+	<message key="user.apiKey.secretRequired">До генерации ключа API администратор вашего сайта должен задать секретный код в файле конфигурации («api_key_secret»).</message>
 </locale>

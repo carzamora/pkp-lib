@@ -4,8 +4,8 @@
 <!--
   * plugins/generic/usageStats/locale/pt_BR/locale.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2003-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2003-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   * Locale information: https://pkp.sfu.ca/wiki/index.php?title=OMP:_Portuguese_(pt_BR)
   * Localization strings
@@ -66,4 +66,6 @@
 	<message key="plugins.generic.usageStats.statsSum">Somar todos os downloads de arquivos</message>
 	<message key="plugins.generic.usageStats.noStats">Não há dados estatísticos.</message>
 	<message key="plugins.generic.usageStats.monthInitials">Jan Fev Mar Abr Mai Jun Jul Ago Set Out Nov Dez</message>
+  <message key="plugins.generic.usageStats.settings.statsDisplayOptions.contextWide">Mostrar gráfico de estatísticas da submissão para o leitor</message>
+  <message key="plugins.generic.usageStats.downloads">Downloads</message>
 </locale>

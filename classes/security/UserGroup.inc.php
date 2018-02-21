@@ -3,8 +3,8 @@
 /**
  * @file classes/security/UserGroup.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class UserGroup
@@ -117,6 +117,24 @@ class UserGroup extends DataObject {
 	 */
 	function setPermitSelfRegistration($permitSelfRegistration) {
 		$this->setData('permitSelfRegistration', $permitSelfRegistration);
+	}
+
+	/**
+	 * Get the recommendOnly option (whether or not the manager or the sub-editor role
+	 * can only recommend or also make decisions in the submission review)
+	 * @return boolean
+	 */
+	function getRecommendOnly() {
+		return $this->getData('recommendOnly');
+	}
+
+	/**
+	 * Set the recommendOnly option (whether or not the manager or the sub-editor role
+	 * can only recommend or also make decisions in the submission review)
+	 * @param $recommendOnly boolean
+	 */
+	function setRecommendOnly($recommendOnly) {
+		$this->setData('recommendOnly', $recommendOnly);
 	}
 
 	/**

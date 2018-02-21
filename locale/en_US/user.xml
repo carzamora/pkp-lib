@@ -4,8 +4,8 @@
 <!--
   * locale/en_US/user.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings.
@@ -35,9 +35,7 @@
 	<message key="user.dateRegistered">Date registered</message>
 	<message key="user.editMyProfile">Edit My Profile</message>
 	<message key="user.email">Email</message>
-	<message key="user.feminine">F</message>
 	<message key="user.firstName">First Name</message>
-	<message key="user.gender">Gender</message>
 	<message key="user.initialsExample">Joan Alice Smith = JAS</message>
 	<message key="user.initials">Initials</message>
 	<message key="user.interests">Reviewing interests</message>
@@ -72,11 +70,9 @@
 	<message key="user.logOutAs">Logout as</message>
 	<message key="user.hello">Hello, </message>
 	<message key="user.mailingAddress">Mailing Address</message>
-	<message key="user.masculine">M</message>
 	<message key="user.middleName">Middle Name</message>
 	<message key="user.myAccount">My Account</message>
 	<message key="user.name">Name</message>
-	<message key="user.other">Other</message>
 	<message key="user.password">Password</message>
 	<message key="user.repeatPassword">Repeat password</message>
 	<message key="user.phone">Phone</message>
@@ -119,6 +115,7 @@
 	<message key="user.register">Register</message>
 	<message key="user.register.usernameRestriction">The username must contain only lowercase letters, numbers, and hyphens/underscores.</message>
 	<message key="user.register.registrationCompleted"><![CDATA[You have successfully registered. <a href="{$profileUrl}">Click here</a> to complete your user profile.]]></message>
+	<message key="user.role.assistant">Assistant</message>
 	<message key="user.role.author">Author</message>
 	<message key="user.role.author_s">Author(s)</message>
 	<message key="user.role.authors">Authors</message>
@@ -156,4 +153,5 @@
 	<message key="user.apiKeyEnabled">Enable external applications with the API key to access this account</message>
 	<message key="user.apiKey.generate">Generate new API key</message>
 	<message key="user.apiKey.generateWarning">Generating a new API key will invalidate any existing key for this user.</message>
+	<message key="user.apiKey.secretRequired">Before generating an API key, your site administrator must set a secret in the config file ("api_key_secret").</message>
 </locale>

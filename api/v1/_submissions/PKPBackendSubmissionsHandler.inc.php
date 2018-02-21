@@ -3,8 +3,8 @@
 /**
  * @file api/v1/_submissions/PKPBackendSubmissionsHandler.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPBackendSubmissionsHandler
@@ -16,6 +16,7 @@
 
 import('lib.pkp.classes.handler.APIHandler');
 import('lib.pkp.classes.submission.Submission');
+import('classes.core.ServicesContainer');
 
 abstract class PKPBackendSubmissionsHandler extends APIHandler {
 
@@ -86,8 +87,9 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler {
 		foreach ($params as $param => $val) {
 			switch ($param) {
 
-				// Always convert status to array
+				// Always convert status and stageIds to array
 				case 'status':
+				case 'stageIds':
 					if (is_string($val) && strpos($val, ',') > -1) {
 						$val = explode(',', $val);
 					} elseif (!is_array($val)) {
@@ -119,6 +121,10 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler {
 				case 'orderDirection':
 					$params[$param] = $val === 'ASC' ? $val : 'DESC';
 					break;
+
+				case 'isIncomplete':
+				case 'isOverdue':
+					$params[$param] = true;
 			}
 		}
 
@@ -131,12 +137,24 @@ abstract class PKPBackendSubmissionsHandler extends APIHandler {
 
 		\HookRegistry::call('API::_submissions::params', array(&$params, $slimRequest, $response));
 
-		import('classes.core.ServicesContainer');
-		$submissions = ServicesContainer::instance()
-				->get('submission')
-				->getSubmissionList($context->getId(), $params);
+		$submissionService = ServicesContainer::instance()->get('submission');
+		$submissions = $submissionService->getSubmissions($context->getId(), $params);
+		$items = array();
+		if (!empty($submissions)) {
+			$propertyArgs = array(
+				'request' => $request,
+				'slimRequest' => $slimRequest,
+			);
+			foreach ($submissions as $submission) {
+				$items[] = $submissionService->getBackendListProperties($submission, $propertyArgs);
+			}
+		}
+		$data = array(
+			'items' => $items,
+			'maxItems' => $submissionService->getSubmissionsMaxCount($context->getId(), $params),
+		);
 
-		return $response->withJson($submissions);
+		return $response->withJson($data);
 	}
 
 	/**

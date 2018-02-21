@@ -4,8 +4,8 @@
 <!--
   * locale/nb_NO/common.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings for the nb_NO (Norsk bokmål) locale.
@@ -90,8 +90,8 @@
 	<message key="common.fileName">Filnavn</message>
 	<message key="common.fileSize">Filstørrelse</message>
 	<message key="common.fileType">Filtype</message>
-	<message key="common.file.namingPattern">{$username}, {$userGroup}, {$originalFilename}</message>
-	<message key="common.file.anonymousNamingPattern">{$userGroup}, {$originalFilename}</message>
+	<message key="common.file.namingPattern">{$username}, {$originalFilename}</message>
+	<message key="common.file.anonymousNamingPattern">{$genre}, {$originalFilename}</message>
 	<message key="common.height">Høyde</message>
 	<message key="common.homePageHeaderLogo.altText">Tidsskriftets hjemmeside: topplogo</message>
 	<message key="common.hour">Klokkeslett</message>
@@ -296,7 +296,6 @@
 	<message key="notification.allow">Disse varslingstypene skal vises i mine varslinger.</message>
 	<message key="notification.confirmError">Det oppstod en feil i behandlingen av ditt varslingsabonnement.</message>
 	<message key="notification.confirmSuccess">Ditt varslingsabonnement er nå i orden.</message>
-	<message key="notification.email">Send meg en e-post for disse varslingstypene.</message>
 	<message key="notification.location">Gå til nettadresse (URL)</message>
 	<message key="notification.mailList">E-postliste for varslinger</message>
 	<message key="notification.mailList.emailInvalid">Skriv inn en gyldig e-postadresse.</message>
@@ -369,4 +368,6 @@
 	<message key="about.guidelines">Veiledninger</message>
 	<message key="common.name">Navn</message>
 	<message key="navigation.archives">Arkiv</message>
+
+	<message key="semicolon">{$label}:</message>
 </locale>

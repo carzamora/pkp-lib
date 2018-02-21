@@ -3,8 +3,8 @@
 /**
  * @file classes/security/UserGroupDAO.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class UserGroupDAO
@@ -172,6 +172,15 @@ class UserGroupDAO extends DAO {
 	}
 
 	/**
+	 * @copydoc DAO::getAdditionalFieldNames()
+	 */
+	function getAdditionalFieldNames() {
+		return array_merge(parent::getAdditionalFieldNames(), array(
+			'recommendOnly',
+		));
+	}
+
+	/**
 	 * Update the localized data for this object
 	 * @param $author object
 	 */
@@ -246,7 +255,8 @@ class UserGroupDAO extends DAO {
 			FROM	user_groups
 			WHERE	context_id = ? AND
 				role_id = ?
-				' . ($default?' AND is_default = ?':''),
+				' . ($default?' AND is_default = ?':'')
+			. ' ORDER BY user_group_id',
 			$params,
 			$dbResultRange
 		);
@@ -946,6 +956,36 @@ class UserGroupDAO extends DAO {
 		$result->Close();
 		return $returner;
 	}
+
+	/**
+	 * Get all user group IDs with recommendOnly option enabled.
+	 * @param $contextId integer
+	 * @param $roleId integer (optional)
+	 * @return array
+	 */
+	function getRecommendOnlyGroupIds($contextId, $roleId = null) {
+		$params = array((int) $contextId);
+		if ($roleId) $params[] = (int) $roleId;
+
+		$result = $this->retrieve(
+			'SELECT	ug.user_group_id
+			FROM user_groups ug
+			JOIN user_group_settings ugs ON (ugs.user_group_id = ug.user_group_id AND ugs.setting_name = \'recommendOnly\' AND ugs.setting_value = \'1\')
+			WHERE ug.context_id = ?
+			' . ($roleId?' AND ug.role_id = ?':''),
+			$params
+		);
+
+		$userGroupIds = array();
+		while (!$result->EOF) {
+			$userGroupIds[] = (int) $result->fields[0];
+			$result->MoveNext();
+		}
+
+		$result->Close();
+		return $userGroupIds;
+	}
+
 }
 
 ?>

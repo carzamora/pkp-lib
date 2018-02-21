@@ -4,8 +4,8 @@
 <!--
   * locale/es_ES/user.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   * Credits: https://pkp.sfu.ca/wiki/index.php?title=OMP:_Spanish_(es_ES)
   * Localization strings.
@@ -32,9 +32,7 @@
 	<message key="user.dateRegistered">Fecha de registro</message>
 	<message key="user.editMyProfile">Editar mi perfil</message>
 	<message key="user.email">Correo electrónico</message>
-	<message key="user.feminine">F</message>
 	<message key="user.firstName">Nombre</message>
-	<message key="user.gender">Sexo</message>
 	<message key="user.initialsExample">Luz Ruiz Plasencia = LRP</message>
 	<message key="user.initials">Iniciales</message>
 	<message key="user.interests">Intereses de revisión</message>
@@ -63,11 +61,9 @@
 	<message key="user.logOutAs">Cerrar sesión como</message>
 	<message key="user.hello">Hola: </message>
 	<message key="user.mailingAddress">Dirección postal</message>
-	<message key="user.masculine">M</message>
 	<message key="user.middleName">Segundo Nombre</message>
 	<message key="user.myAccount">Mi cuenta</message>
 	<message key="user.name">Nombre</message>
-	<message key="user.other">Otro</message>
 	<message key="user.password">Contraseña</message>
 	<message key="user.repeatPassword">Repita la contraseña</message>
 	<message key="user.phone">Teléfono</message>
@@ -107,6 +103,7 @@
 	<message key="user.register.registerAs">Registrarse en {$contextName} como...</message>
 	<message key="user.register">Registrarse</message>
 	<message key="user.register.usernameRestriction">El nombre de usuario debe contener sólo letras en minúscula, números, y guiones/guiones bajos.</message>
+	<message key="user.role.assistant">Ayudante de producción</message>
 	<message key="user.role.author">Autor</message>
 	<message key="user.role.author_s">Autor/a(es/as)</message>
 	<message key="user.role.authors">Autores</message>

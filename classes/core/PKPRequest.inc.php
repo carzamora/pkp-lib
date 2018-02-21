@@ -3,8 +3,8 @@
 /**
  * @file classes/core/PKPRequest.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPRequest
@@ -565,13 +565,13 @@ class PKPRequest {
 
 		$user =& Registry::get('user', true, null);
 
-		// Reference required
-		if (is_a($_this, 'PKPRequest') && is_a($_this->getRouter(), 'APIRouter') && ($token = $_this->getUserVar('apiToken'))) {
+		$router = $_this->getRouter();
+		if (is_a($router, 'APIRouter') && !is_null($handler = $router->getHandler()) && !is_null($token = $handler->getApiToken())) {
 			if ($user === null) {
 				$userDao = DAORegistry::getDAO('UserDAO');
 				$user = $userDao->getBySetting('apiKey', $token);
 			}
-			if (!$user->getData('apiKeyEnabled')) return null;
+			if (is_null($user) || !$user->getData('apiKeyEnabled')) return null;
 			return $user;
 		}
 

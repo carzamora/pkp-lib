@@ -2,8 +2,8 @@
 /**
  * @file classes/controllers/list/submissions/SelectSubmissionsListHandler.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2016 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class SelectSubmissionsListHandler
@@ -11,7 +11,7 @@
  *
  * @brief A list handler for selecting submissions
  */
-import('lib.pkp.controllers.list.submissions.SubmissionsListHandler');
+import('controllers.list.submissions.SubmissionsListHandler');
 
 class SelectSubmissionsListHandler extends SubmissionsListHandler {
 
@@ -23,7 +23,7 @@ class SelectSubmissionsListHandler extends SubmissionsListHandler {
 	public $_inputName = 'selectedSubmissions';
 
 	/**
-	 * @see SubmissionsListHandler
+	 * @copydoc SubmissionsListHandler
 	 */
 	public function init( $args = array() ) {
 		parent::init($args);
@@ -31,7 +31,7 @@ class SelectSubmissionsListHandler extends SubmissionsListHandler {
 	}
 
 	/**
-	 * @see SubmissionsListHandler
+	 * @copydoc SubmissionsListHandler
 	 */
 	public function getConfig() {
 		$config = parent::getConfig();

@@ -1,8 +1,8 @@
 {**
  * templates/reviewer/review/step3.tpl
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * Show the step 3 review page
@@ -36,10 +36,10 @@
 			{include file="reviewer/review/reviewFormResponse.tpl"}
 		{else}
 			{fbvFormSection}
-				{fbvElement type="textarea" id="comments" name="comments" value=$comment readonly=$reviewIsComplete label=submission.comments.canShareWithAuthor rich=true}
+				{fbvElement type="textarea" id="comments" name="comments" value=$comment readonly=$reviewIsComplete label="submission.comments.canShareWithAuthor" rich=true}
 			{/fbvFormSection}
 			{fbvFormSection}
-				{fbvElement type="textarea" id="commentsPrivate" name="commentsPrivate" value=$commentPrivate readonly=$reviewIsComplete label=submission.comments.cannotShareWithAuthor rich=true}
+				{fbvElement type="textarea" id="commentsPrivate" name="commentsPrivate" value=$commentPrivate readonly=$reviewIsComplete label="submission.comments.cannotShareWithAuthor" rich=true}
 			{/fbvFormSection}
 		{/if}
 	{/fbvFormSection}
@@ -54,5 +54,6 @@
 	{url|assign:cancelUrl page="reviewer" op="submission" path=$submission->getId() step=2 escape=false}
 	{fbvFormButtons submitText="reviewer.submission.submitReview" confirmSubmit="reviewer.confirmSubmit" cancelText="navigation.goBack" cancelUrl=$cancelUrl cancelUrlTarget="_self" submitDisabled=$reviewIsComplete}
 {/fbvFormArea}
-</form>
+
 <p><span class="formRequired">{translate key="common.requiredField"}</span></p>
+</form>

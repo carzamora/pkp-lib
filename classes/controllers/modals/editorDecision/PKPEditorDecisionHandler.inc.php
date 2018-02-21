@@ -3,8 +3,8 @@
 /**
  * @file controllers/modals/editorDecision/EditorDecisionHandler.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class EditorDecisionHandler
@@ -36,9 +36,9 @@ class PKPEditorDecisionHandler extends Handler {
 	}
 
 	/**
-	 * @see PKPHandler::initialize()
+	 * @copydoc PKPHandler::initialize()
 	 */
-	function initialize($request, $args) {
+	function initialize($request) {
 		AppLocale::requireComponents(
 			LOCALE_COMPONENT_APP_COMMON,
 			LOCALE_COMPONENT_APP_EDITOR,
@@ -217,6 +217,11 @@ class PKPEditorDecisionHandler extends Handler {
 						$body .= PKPString::stripUnsafeHtml($comment->getComments());
 					}
 				}
+
+				// Add reviewer recommendation
+				$recommendation = $reviewAssignment->getLocalizedRecommendation();
+				$body .= __('submission.recommendation', array('recommendation' => $recommendation)) . "<br>\n";
+
 				$body .= "<br>$textSeparator<br><br>";
 
 				if ($reviewFormId = $reviewAssignment->getReviewFormId()) {
@@ -254,7 +259,7 @@ class PKPEditorDecisionHandler extends Handler {
 								}
 								$body .= '<br>';
 							} else {
-								$body .= '<blockquote>' . htmlspecialchars($reviewFormResponse->getValue()) . '</blockquote>';
+								$body .= '<blockquote>' . nl2br(htmlspecialchars($reviewFormResponse->getValue())) . '</blockquote>';
 							}
 						}
 
@@ -273,6 +278,54 @@ class PKPEditorDecisionHandler extends Handler {
 		return new JSONMessage(true, empty($body)?__('editor.review.noReviews'):$body);
 	}
 
+	/**
+	 * Show the editor recommendation form
+	 * @param $args array
+	 * @param $request PKPRequest
+	 * @return JSONMessage
+	 */
+	function sendRecommendation($args, $request) {
+		// Retrieve the authorized submission, stage id and review round.
+		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+		$stageId = $this->getAuthorizedContextObject(ASSOC_TYPE_WORKFLOW_STAGE);
+		assert(in_array($stageId, $this->_getReviewStages()));
+		$reviewRound = $this->getAuthorizedContextObject(ASSOC_TYPE_REVIEW_ROUND);
+		assert(is_a($reviewRound, 'ReviewRound'));
+
+		// Form handling
+		import('lib.pkp.controllers.modals.editorDecision.form.RecommendationForm');
+		$editorRecommendationForm = new RecommendationForm($submission, $stageId, $reviewRound);
+		$editorRecommendationForm->initData($request);
+		return new JSONMessage(true, $editorRecommendationForm->fetch($request));
+	}
+
+	/**
+	 * Show the editor recommendation form
+	 * @param $args array
+	 * @param $request PKPRequest
+	 * @return JSONMessage
+	 */
+	function saveRecommendation($args, $request) {
+		// Retrieve the authorized submission, stage id and review round.
+		$submission = $this->getAuthorizedContextObject(ASSOC_TYPE_SUBMISSION);
+		$stageId = $this->getAuthorizedContextObject(ASSOC_TYPE_WORKFLOW_STAGE);
+		assert(in_array($stageId, $this->_getReviewStages()));
+		$reviewRound = $this->getAuthorizedContextObject(ASSOC_TYPE_REVIEW_ROUND);
+		assert(is_a($reviewRound, 'ReviewRound'));
+
+		// Form handling
+		import('lib.pkp.controllers.modals.editorDecision.form.RecommendationForm');
+		$editorRecommendationForm = new RecommendationForm($submission, $stageId, $reviewRound);
+		$editorRecommendationForm->readInputData();
+		if ($editorRecommendationForm->validate()) {
+			$editorRecommendationForm->execute($request);
+			$json = new JSONMessage(true);
+			$json->setGlobalEvent('decisionActionUpdated');
+			return $json;
+		}
+		return new JSONMessage(false);
+	}
+
 
 	//
 	// Protected helper methods
@@ -282,7 +335,7 @@ class PKPEditorDecisionHandler extends Handler {
 	 * @return array
 	 */
 	protected function _getReviewRoundOps() {
-		return array('promoteInReview', 'savePromoteInReview', 'newReviewRound', 'saveNewReviewRound', 'sendReviewsInReview', 'saveSendReviewsInReview', 'importPeerReviews');
+		return array('promoteInReview', 'savePromoteInReview', 'newReviewRound', 'saveNewReviewRound', 'sendReviewsInReview', 'saveSendReviewsInReview', 'importPeerReviews', 'sendRecommendation', 'saveRecommendation');
 	}
 
 	/**

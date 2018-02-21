@@ -4,8 +4,8 @@
 <!--
   * locale/cs_CZ/common.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings for the cs_CZ (Čeština) locale.
@@ -100,8 +100,8 @@
 	<message key="common.fileName">Jméno souboru</message>
 	<message key="common.fileSize">Velikost souboru</message>
 	<message key="common.fileType">Typ souboru</message>
-	<message key="common.file.namingPattern">{$username}, {$userGroup}, {$originalFilename}</message>
-	<message key="common.file.anonymousNamingPattern">{$userGroup}, {$originalFilename}</message>
+	<message key="common.file.namingPattern">{$username}, {$originalFilename}</message>
+	<message key="common.file.anonymousNamingPattern">{$genre}, {$originalFilename}</message>
 	<message key="common.height">Výška</message>
 	<message key="common.homePageHeaderLogo.altText">Logo záhlaví domácí stránky</message>
 	<message key="common.hour">Hodina</message>
@@ -257,7 +257,6 @@
 	<message key="notification.allow">Povolit, aby se tento typ události zobrazoval v mém seznamu oznámení.</message>
 	<message key="notification.confirmError">Vyskytla se chyba při potvrzování vašeho přihlášení.</message>
 	<message key="notification.confirmSuccess">Byl jste úspěšně přihlášen.</message>
-	<message key="notification.email">Posílejte mi email s těmito typy oznámení.</message>
 	<message key="notification.location">Přejít na URL</message>
 	<message key="notification.mailList">Zasílací seznam oznámení</message>
 	<message key="notification.mailList.emailInvalid">Vložte prosím platnou emailovou adresu.</message>
@@ -528,4 +527,6 @@
 <li>U dokumentů Microsoft Office je také třeba odstranit identifikace autora z vlastností souboru (viz pod Soubor v aplikaci Word) klepnutím na  "Soubor" v hlavní nabídce aplikace Microsoft: Soubor & gt; Uložit jako & gt; Nástroje (nebo možnosti s Mac) & gt; Bezpečnost & gt; Odstranit osobní údaje z vlastností souborů uložte & gt; Uložit. </ Li>
 <Li> V případě souborů PDF by měly být názvy autorů také odstraněny z vlastností dokumentu, které naleznete v hlavním menu Soubor v aplikaci Adobe Acrobat. </ Li>
 </ Ul>]]></message>
+
+	<message key="semicolon">{$label}:</message>
 </locale>

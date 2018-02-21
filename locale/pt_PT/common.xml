@@ -4,8 +4,8 @@
 <!--
   * locale/pt_PT/common.xml
   *
-  * Copyright (c) 2014-2017 Simon Fraser University
-  * Copyright (c) 2000-2017 John Willinsky
+  * Copyright (c) 2014-2018 Simon Fraser University
+  * Copyright (c) 2000-2018 John Willinsky
   * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
   *
   * Localization strings.
@@ -86,8 +86,8 @@
 	<message key="common.fileName">Nome do ficheiro</message>
 	<message key="common.fileSize">Tamanho do ficheiro</message>
 	<message key="common.fileType">Tipo do Ficheiro</message>
-	<message key="common.file.namingPattern">{$username}, {$userGroup}, {$originalFilename}</message>
-	<message key="common.file.anonymousNamingPattern">{$userGroup}, {$originalFilename}</message>
+	<message key="common.file.namingPattern">{$username}, {$originalFilename}</message>
+	<message key="common.file.anonymousNamingPattern">{$genre}, {$originalFilename}</message>
 	<message key="common.height">Altura</message>
 	<message key="common.homePageHeaderLogo.altText">Logótipo do cabeçalho da página inicial</message>
 	<message key="common.hour">Hora</message>
@@ -271,7 +271,7 @@
 	<message key="notification.allow">Exibir estas notificações no meu canal de notificações</message>
 	<message key="notification.confirmError">Ocorreu um erro ao confirmar a sua subscrição.</message>
 	<message key="notification.confirmSuccess">Subscrição realizada com sucesso.</message>
-	<message key="notification.email">Enviar e-mail para este tipo de notificações.</message>
+	<message key="notification.email">No enviar e-mail para este tipo de notificações.</message>
 	<message key="notification.location">Ir para o URL</message>
 	<message key="notification.mailList">Lista de correio de notificações</message>
 	<message key="notification.mailList.emailInvalid">Indique um endereço de e-mail válido.</message>
@@ -524,4 +524,6 @@
 	<message key="notification.type.assignCopyeditors">Atribuir um Editor de Cópia usando o link na lista de Participantes</message>
 	<message key="notification.type.awaitingCopyedits">Aguardando as edições das cópias.</message>
 	<message key="notification.type.roundStatusTitle">Estado Ronda {$round}</message>
+
+	<message key="semicolon">{$label}:</message>
 </locale>

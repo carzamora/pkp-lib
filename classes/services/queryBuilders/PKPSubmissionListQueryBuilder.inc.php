@@ -3,8 +3,8 @@
 /**
  * @file classes/services/QueryBuilders/PKPSubmissionListQueryBuilder.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class SubmissionListQueryBuilder
@@ -19,7 +19,7 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 
-	/** @var int Context ID */
+	/** @var int|null Context ID */
 	protected $contextId = null;
 
 	/** @var array list of columns for query */
@@ -31,17 +31,29 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 	/** @var string order by direction */
 	protected $orderDirection = 'DESC';
 
-	/** @var array list of statuses */
+	/** @var array|null list of statuses */
 	protected $statuses = null;
 
-	/** @var int user ID */
+	/** @var array|null list of stage ids */
+	protected $stageIds = null;
+
+	/** @var int|null user ID */
 	protected $assigneeId = null;
 
-	/** @var string search phrase */
+	/** @var string|null search phrase */
 	protected $searchPhrase = null;
 
-	/** @var bool whether to return only a count of results */
+	/** @var string|null return a Submission or PublishedArticle\PublishedMonograph */
+	protected $returnObject = null;
+
+	/** @var bool|null whether to return only a count of results */
 	protected $countOnly = null;
+
+	/** @var bool whether to return only incomplete results */
+	protected $isIncomplete = false;
+
+	/** @var bool|null whether to return only submissions with overdue review assignments */
+	protected $isOverdue = false;
 
 	/**
 	 * Constructor
@@ -89,6 +101,45 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 	}
 
 	/**
+	 * Set stage filter
+	 *
+	 * @param int|array $stageIds
+	 *
+	 * @return \OJS\Services\QueryBuilders\SubmissionListQueryBuilder
+	 */
+	public function filterByStageIds($stageIds) {
+		if (!is_null($stageIds) && !is_array($stageIds)) {
+			$stageIds = array($stageIds);
+		}
+		$this->stageIds = $stageIds;
+		return $this;
+	}
+
+	/**
+	 * Set incomplete submissions filter
+	 *
+	 * @param boolean $isIncomplete
+	 *
+	 * @return \OJS\Services\QueryBuilders\SubmissionListQueryBuilder
+	 */
+	public function filterByIncomplete($isIncomplete) {
+		$this->isIncomplete = $isIncomplete;
+		return $this;
+	}
+
+	/**
+	 * Set overdue submissions filter
+	 *
+	 * @param boolean $isOverdue
+	 *
+	 * @return \OJS\Services\QueryBuilders\SubmissionListQueryBuilder
+	 */
+	public function filterByOverdue($isOverdue) {
+		$this->isOverdue = $isOverdue;
+		return $this;
+	}
+
+	/**
 	 * Limit results to a specific user's submissions
 	 *
 	 * @param int $assigneeId
@@ -109,6 +160,18 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 	 */
 	public function searchPhrase($phrase) {
 		$this->searchPhrase = $phrase;
+		return $this;
+	}
+
+	/**
+	 * Return Submission or PublishedArticle|PublishedMonograph objects
+	 *
+	 * @param string $returnObject
+	 *
+	 * @return \OJS\Services\QueryBuilders\SubmissionListQueryBuilder
+	 */
+	public function returnObject($returnObject) {
+		$this->returnObject = $returnObject;
 		return $this;
 	}
 
@@ -143,9 +206,18 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 			$q->groupBy('st.setting_value');
 		}
 
+		// return object
+		if ($this->returnObject === SUBMISSION_RETURN_PUBLISHED) {
+			$this->columns[] = 'ps.*';
+			$q->leftJoin('published_submissions as ps','ps.submission_id','=','s.submission_id')
+				->groupBy('ps.date_published');
+			$q->whereNotNull('ps.pub_id');
+		}
+
 		// statuses
 		if (!is_null($this->statuses)) {
-			if (in_array(STATUS_PUBLISHED, $this->statuses)) {
+			import('lib.pkp.classes.submission.Submission'); // STATUS_ constants
+			if (in_array(STATUS_PUBLISHED, $this->statuses) && $this->returnObject !== SUBMISSION_RETURN_PUBLISHED) {
 				$this->columns[] = 'ps.date_published';
 				$q->leftJoin('published_submissions as ps','ps.submission_id','=','s.submission_id')
 					->groupBy('ps.date_published');
@@ -153,8 +225,45 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 			$q->whereIn('s.status', $this->statuses);
 		}
 
+		// stage ids
+		if (!is_null($this->stageIds)) {
+			$q->whereIn('s.stage_id', $this->stageIds);
+		}
+
+		// incomplete submissions
+		if ($this->isIncomplete) {
+			$q->where('s.submission_progress', '>', 0);
+		}
+
+		// overdue submisions
+		if ($this->isOverdue) {
+			$q->leftJoin('review_assignments as raod', 'raod.submission_id', '=', 's.submission_id')
+				->leftJoin('review_rounds as rr', function($table) {
+					$table->on('rr.submission_id', '=', 's.submission_id');
+					$table->on('raod.review_round_id', '=', 'rr.review_round_id');
+				});
+			// Only get overdue assignments on active review rounds
+			import('lib.pkp.classes.submission.reviewRound.ReviewRound');
+			$q->where('rr.status', '!=', REVIEW_ROUND_STATUS_RESUBMIT_FOR_REVIEW);
+			$q->where('rr.status', '!=', REVIEW_ROUND_STATUS_SENT_TO_EXTERNAL);
+			$q->where('rr.status', '!=', REVIEW_ROUND_STATUS_ACCEPTED);
+			$q->where('rr.status', '!=', REVIEW_ROUND_STATUS_DECLINED);
+			$q->where(function ($q) {
+				$q->where('raod.declined', '<>', 1);
+				$q->where(function ($q) {
+					$q->where('raod.date_due', '<', \Core::getCurrentDate(strtotime('tomorrow')));
+					$q->whereNull('raod.date_completed');
+				});
+				$q->orWhere(function ($q) {
+					$q->where('raod.date_response_due', '<', \Core::getCurrentDate(strtotime('tomorrow')));
+					$q->whereNull('raod.date_confirmed');
+				});
+			});
+		}
+
 		// assigned to
-		if (!is_null($this->assigneeId) && ($this->assigneeId !== -1)) {
+		$isAssignedOnly = !is_null($this->assigneeId) && ($this->assigneeId !== -1);
+		if ($isAssignedOnly) {
 			$assigneeId = $this->assigneeId;
 
 			// Stage assignments
@@ -193,15 +302,21 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 					->leftJoin('authors as au','s.submission_id','=','au.submission_id');
 
 				foreach ($words as $word) {
-					$q->where(function($q) use ($word)  {
+					$q->where(function($q) use ($word, $isAssignedOnly)  {
 						$q->where(function($q) use ($word) {
 							$q->where('ss.setting_name', 'title');
 							$q->where('ss.setting_value', 'LIKE', "%{$word}%");
 						});
-						$q->orWhere(function($q) use ($word) {
-							$q->where('au.first_name', 'LIKE', "%{$word}%");
-							$q->orWhere('au.middle_name', 'LIKE', "%{$word}%");
-							$q->orWhere('au.last_name', 'LIKE', "%{$word}%");
+						$q->orWhere(function($q) use ($word, $isAssignedOnly) {
+							// Prevent reviewers from matching searches by author name
+							if ($isAssignedOnly) {
+								$q->whereNull('ra.reviewer_id');
+							}
+							$q->where(function($q) use ($word) {
+								$q->where('au.first_name', 'LIKE', "%{$word}%");
+								$q->orWhere('au.middle_name', 'LIKE', "%{$word}%");
+								$q->orWhere('au.last_name', 'LIKE', "%{$word}%");
+							});
 						});
 						if (ctype_digit($word)) {
 							$q->orWhere('s.submission_id', '=', $word);
@@ -213,7 +328,7 @@ abstract class PKPSubmissionListQueryBuilder extends BaseQueryBuilder {
 		}
 
 		// Add app-specific query statements
-		\HookRegistry::call('Submission::listQueryBuilder::get', array(&$q, $this));
+		\HookRegistry::call('Submission::getSubmissions::queryObject', array(&$q, $this));
 
 		if (!empty($this->countOnly)) {
 			$q->select(Capsule::raw('count(*) as submission_count'));

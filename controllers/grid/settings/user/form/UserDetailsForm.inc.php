@@ -3,8 +3,8 @@
 /**
  * @file controllers/grid/settings/user/form/UserDetailsForm.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class UserDetailsForm
@@ -38,6 +38,7 @@ class UserDetailsForm extends UserForm {
 		$site = $request->getSite();
 
 		// Validation checks for this form
+		$form = $this;
 		if ($userId == null) {
 			$this->addCheck(new FormValidator($this, 'username', 'required', 'user.profile.form.usernameRequired'));
 			$this->addCheck(new FormValidatorCustom($this, 'username', 'required', 'user.register.form.usernameExists', array(DAORegistry::getDAO('UserDAO'), 'userExistsByUsername'), array($this->userId, true), true));
@@ -46,11 +47,15 @@ class UserDetailsForm extends UserForm {
 			if (!Config::getVar('security', 'implicit_auth')) {
 				$this->addCheck(new FormValidator($this, 'password', 'required', 'user.profile.form.passwordRequired'));
 				$this->addCheck(new FormValidatorLength($this, 'password', 'required', 'user.register.form.passwordLengthRestriction', '>=', $site->getMinPasswordLength()));
-				$this->addCheck(new FormValidatorCustom($this, 'password', 'required', 'user.register.form.passwordsDoNotMatch', create_function('$password,$form', 'return $password == $form->getData(\'password2\');'), array($this)));
+				$this->addCheck(new FormValidatorCustom($this, 'password', 'required', 'user.register.form.passwordsDoNotMatch', function($password) use ($form) {
+					return $password == $form->getData('password2');
+				}));
 			}
 		} else {
 			$this->addCheck(new FormValidatorLength($this, 'password', 'optional', 'user.register.form.passwordLengthRestriction', '>=', $site->getMinPasswordLength()));
-			$this->addCheck(new FormValidatorCustom($this, 'password', 'optional', 'user.register.form.passwordsDoNotMatch', create_function('$password,$form', 'return $password == $form->getData(\'password2\');'), array($this)));
+			$this->addCheck(new FormValidatorCustom($this, 'password', 'optional', 'user.register.form.passwordsDoNotMatch', function($password) use ($form) {
+				return $password == $form->getData('password2');
+			}));
 		}
 		$this->addCheck(new FormValidator($this, 'firstName', 'required', 'user.profile.form.firstNameRequired'));
 		$this->addCheck(new FormValidator($this, 'lastName', 'required', 'user.profile.form.lastNameRequired'));
@@ -88,7 +93,6 @@ class UserDetailsForm extends UserForm {
 				'suffix' => $user->getSuffix(),
 				'signature' => $user->getSignature(null), // Localized
 				'initials' => $user->getInitials(),
-				'gender' => $user->getGender(),
 				'affiliation' => $user->getAffiliation(null), // Localized
 				'email' => $user->getEmail(),
 				'userUrl' => $user->getUrl(),
@@ -122,6 +126,8 @@ class UserDetailsForm extends UserForm {
 		foreach($data as $key => $value) {
 			$this->setData($key, $value);
 		}
+
+		parent::initData($args, $request);
 	}
 
 	/**
@@ -135,7 +141,6 @@ class UserDetailsForm extends UserForm {
 		$userDao = DAORegistry::getDAO('UserDAO');
 
 		$templateMgr->assign(array(
-			'genderOptions' => $userDao->getGenderOptions(),
 			'minPasswordLength' => $site->getMinPasswordLength(),
 			'source' => $request->getUserVar('source'),
 			'userId' => $this->userId,
@@ -161,7 +166,7 @@ class UserDetailsForm extends UserForm {
 			$templateMgr->assign('authSourceOptions', $authSourceOptions);
 		}
 
-		return $this->fetch($request);
+		return parent::display($args, $request);
 	}
 
 
@@ -181,7 +186,6 @@ class UserDetailsForm extends UserForm {
 			'middleName',
 			'lastName',
 			'suffix',
-			'gender',
 			'initials',
 			'signature',
 			'affiliation',
@@ -221,7 +225,7 @@ class UserDetailsForm extends UserForm {
 	 * @param $request PKPRequest
 	 */
 	function &execute($args, $request) {
-		parent::execute($request);
+		parent::execute($args, $request);
 
 		$userDao = DAORegistry::getDAO('UserDAO');
 		$context = $request->getContext();
@@ -242,7 +246,6 @@ class UserDetailsForm extends UserForm {
 		$user->setLastName($this->getData('lastName'));
 		$user->setSuffix($this->getData('suffix'));
 		$user->setInitials($this->getData('initials'));
-		$user->setGender($this->getData('gender'));
 		$user->setAffiliation($this->getData('affiliation'), null); // Localized
 		$user->setSignature($this->getData('signature'), null); // Localized
 		$user->setEmail($this->getData('email'));

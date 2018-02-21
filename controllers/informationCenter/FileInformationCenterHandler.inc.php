@@ -3,8 +3,8 @@
 /**
  * @file controllers/informationCenter/FileInformationCenterHandler.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class FileInformationCenterHandler
@@ -149,7 +149,7 @@ class FileInformationCenterHandler extends InformationCenterHandler {
 			$notesForm->execute($request);
 
 			// Save to event log
-			$this->_logEvent($request, SUBMISSION_LOG_NOTE_POSTED);
+			$this->_logEvent($request, $this->submissionFile, SUBMISSION_LOG_NOTE_POSTED, 'SubmissionFileLog');
 
 			$user = $request->getUser();
 			NotificationManager::createTrivialNotification($user->getId(), NOTIFICATION_TYPE_SUCCESS, array('contents' => __('notification.addedNote')));
@@ -181,28 +181,6 @@ class FileInformationCenterHandler extends InformationCenterHandler {
 			'eventLogGrid',
 			$dispatcher->url($request, ROUTE_COMPONENT, null, 'grid.eventLog.SubmissionFileEventLogGridHandler', 'fetchGrid', null, $this->_getLinkParams())
 		);
-	}
-
-	/**
-	 * Log an event for this file
-	 * @param $request PKPRequest
-	 * @param $eventType int SUBMISSION_LOG_...
-	 */
-	function _logEvent ($request, $eventType) {
-		// Get the log event message
-		switch($eventType) {
-			case SUBMISSION_LOG_NOTE_POSTED:
-				$logMessage = 'informationCenter.history.notePosted';
-				break;
-			case SUBMISSION_LOG_MESSAGE_SENT:
-				$logMessage = 'informationCenter.history.messageSent';
-				break;
-			default:
-				assert(false);
-		}
-
-		import('lib.pkp.classes.log.SubmissionFileLog');
-		SubmissionFileLog::logEvent($request, $this->submissionFile, $eventType, $logMessage);
 	}
 
 	/**

@@ -8,8 +8,8 @@
 /**
  * @file classes/template/PKPTemplateManager.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2000-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2000-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class TemplateManager
@@ -98,6 +98,7 @@ class PKPTemplateManager extends Smarty {
 		$router = $this->_request->getRouter();
 		assert(is_a($router, 'PKPRouter'));
 
+		AppLocale::requireComponents(LOCALE_COMPONENT_APP_COMMON, LOCALE_COMPONENT_PKP_COMMON);
 		$currentContext = $this->_request->getContext();
 
 		$this->assign(array(
@@ -167,8 +168,35 @@ class PKPTemplateManager extends Smarty {
 				);
 			}
 
-			// Register the primary backend stylesheet
+			// Register the backend app stylesheets
 			if ($dispatcher = $this->_request->getDispatcher()) {
+
+				// FontAwesome - http://fontawesome.io/
+				if (Config::getVar('general', 'enable_cdn')) {
+					$url = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css';
+				} else {
+					$url = $this->_request->getBaseUrl() . '/lib/pkp/styles/fontawesome/fontawesome.css';
+				}
+				$this->addStyleSheet(
+					'fontAwesome',
+					$url,
+					array(
+						'priority' => STYLE_SEQUENCE_CORE,
+						'contexts' => 'backend',
+					)
+				);
+
+				// Stylesheet compiled from Vue.js single-file components
+				$this->addStyleSheet(
+					'build',
+					$this->_request->getBaseUrl() . '/styles/build.css',
+					array(
+						'priority' => STYLE_SEQUENCE_CORE,
+						'contexts' => 'backend',
+					)
+				);
+
+				// The legacy stylesheet for the backend
 				$this->addStyleSheet(
 					'pkpLib',
 					$dispatcher->url($this->_request, ROUTE_COMPONENT, null, 'page.PageHandler', 'css'),
@@ -251,6 +279,12 @@ class PKPTemplateManager extends Smarty {
 					)
 				);
 			}
+
+			// Register Navigation Menus
+			import('classes.core.ServicesContainer');
+			$nmService = ServicesContainer::instance()->get('navigationMenu');
+
+			\HookRegistry::register('LoadHandler', array($nmService, '_callbackHandleCustomNavigationMenuItems'));
 		}
 
 		// Register custom functions
@@ -314,6 +348,9 @@ class PKPTemplateManager extends Smarty {
 		$this->register_function('load_script', array($this, 'smartyLoadScript'));
 		$this->register_function('load_header', array($this, 'smartyLoadHeader'));
 
+		// load NavigationMenu Areas from context
+		$this->register_function('load_menu', array($this, 'smartyLoadNavigationMenuArea'));
+
 		/**
 		 * Kludge to make sure no code that tries to connect to the
 		 * database is executed (e.g., when loading installer pages).
@@ -342,6 +379,14 @@ class PKPTemplateManager extends Smarty {
 					'initialHelpState' => (int) $user->getInlineHelp(),
 				));
 			}
+
+			$multipleContexts = false;
+			$contextDao = Application::getContextDAO();
+			$workingContexts = $contextDao->getAvailable($user?$user->getId():null);
+			if ($workingContexts && $workingContexts->getCount() > 1) {
+				$multipleContexts = true;
+			}
+			$this->assign('multipleContexts', $multipleContexts);
 		}
 
 		// Load enabled block plugins and setup active sidebar variables
@@ -640,6 +685,8 @@ class PKPTemplateManager extends Smarty {
 		import('lib.pkp.classes.security.Role');
 
 		$app_data = array(
+			'currentLocale' => AppLocale::getLocale(),
+			'primaryLocale' => AppLocale::getPrimaryLocale(),
 			'baseUrl' => $this->_request->getBaseUrl(),
 			'contextPath' => isset($context) ? $context->getPath() : '',
 			'apiBasePath' => '/api/v1',
@@ -1020,10 +1067,10 @@ class PKPTemplateManager extends Smarty {
 
 		if (isset($params['key'])) {
 			list($key, $value) = $iterator->nextWithKey();
-			$smarty->assign_by_ref($params['item'], $value);
-			$smarty->assign_by_ref($params['key'], $key);
+			$smarty->assign($params['item'], $value);
+			$smarty->assign($params['key'], $key);
 		} else {
-			$smarty->assign_by_ref($params['item'], $iterator->next());
+			$smarty->assign($params['item'], $iterator->next());
 		}
 		return $content;
 	}
@@ -1351,6 +1398,7 @@ class PKPTemplateManager extends Smarty {
 			'inElUrl' => $params['url'],
 			'inElElId' => $params['id'],
 			'inElClass' => isset($params['class'])?$params['class']:null,
+			'refreshOn' => isset($params['refreshOn'])?$params['refreshOn']:null,
 		));
 
 		if (isset($params['placeholder'])) {
@@ -1388,7 +1436,14 @@ class PKPTemplateManager extends Smarty {
 	 * @return string of HTML
 	 */
 	function smartyCSRF($params, $smarty) {
-		return '<input type="hidden" name="csrfToken" value="' . htmlspecialchars($this->_request->getSession()->getCSRFToken()) . '">';
+		$csrfToken = $this->_request->getSession()->getCSRFToken();
+		switch (isset($params['type'])?$params['type']:null) {
+			case 'raw': return $csrfToken;
+			case 'json': return json_encode($csrfToken);
+			case 'html':
+			default:
+				return '<input type="hidden" name="csrfToken" value="' . htmlspecialchars($csrfToken) . '">';
+		}
 	}
 
 	/**
@@ -1484,6 +1539,68 @@ class PKPTemplateManager extends Smarty {
 	}
 
 	/**
+	 * Smarty usage: {load_menu name=$areaName path=$declaredMenuTemplatePath id=$id ulClass=$ulClass liClass=$liClass}
+	 *
+	 * Custom Smarty function for printing navigation menu areas attached to a context.
+	 * @param $params array associative array
+	 * @param $smarty Smarty
+	 * @return string of HTML/Javascript
+	 */
+	function smartyLoadNavigationMenuArea($params, $smarty) {
+		$areaName = $params['name'];
+		$declaredMenuTemplatePath = $params['path'];
+		$currentContext = $this->_request->getContext();
+		$contextId = CONTEXT_ID_NONE;
+		if ($currentContext) {
+			$contextId = $currentContext->getId();
+		}
+
+		// Don't load menus for an area that's not registered by the active theme
+		$themePlugins = PluginRegistry::getPlugins('themes');
+		if (is_null($themePlugins)) {
+			$themePlugins = PluginRegistry::loadCategory('themes', true);
+		}
+		$activeThemeNavigationAreas = array();
+		foreach ($themePlugins as $themePlugin) {
+			if ($themePlugin->isActive()) {
+				$areas = $themePlugin->getMenuAreas();
+				if (!in_array($areaName, $areas)) {
+					return '';
+				}
+			}
+		}
+
+		$menuTemplatePath = 'frontend/components/navigationMenu.tpl';
+		if (isset($declaredMenuTemplatePath)) {
+			$menuTemplatePath = $declaredMenuTemplatePath;
+		}
+
+		$navigationMenuDao = DAORegistry::getDAO('NavigationMenuDAO');
+
+		$output = '';
+		$navigationMenus = $navigationMenuDao->getByArea($contextId, $areaName)->toArray();
+		if (isset($navigationMenus[0])) {
+			$navigationMenu = $navigationMenus[0];
+			import('classes.core.ServicesContainer');
+			ServicesContainer::instance()
+				->get('navigationMenu')
+				->getMenuTree($navigationMenu);
+		}
+
+
+		$this->assign(array(
+			'navigationMenu' => $navigationMenu,
+			'id' => $params['id'],
+			'ulClass' => $params['ulClass'],
+			'liClass' => $params['liClass'],
+		));
+
+		$output = $this->fetch($menuTemplatePath);
+
+		return $output;
+	}
+
+	/**
 	 * Get resources assigned to a context
 	 *
 	 * A helper function which retrieves script, style and header assets
@@ -1536,16 +1653,24 @@ class PKPTemplateManager extends Smarty {
 	 */
 	function smartyPluckFiles($params, $smarty) {
 
+		// The variable to assign the result to.
+		if (empty($params['assign'])) {
+			error_log('Smarty: {pluck_files} function called without required `assign` param. Called in ' . __FILE__ . ':' . __LINE__);
+			return;
+		}
+
 		// $params['files'] should be an array of SubmissionFile objects
 		if (!is_array($params['files'])) {
 			error_log('Smarty: {pluck_files} function called without required `files` param. Called in ' . __FILE__ . ':' . __LINE__);
-			return array();
+			$smarty->assign($params['assign'], array());
+			return;
 		}
 
 		// $params['by'] is one of an approved list of attributes to select by
 		if (empty($params['by'])) {
 			error_log('Smarty: {pluck_files} function called without required `by` param. Called in ' . __FILE__ . ':' . __LINE__);
-			return array();
+			$smarty->assign($params['assign'], array());
+			return;
 		}
 
 		// The approved list of `by` attributes
@@ -1556,19 +1681,15 @@ class PKPTemplateManager extends Smarty {
 		// genre Any files with a genre ID (file genres are configurable but typically refer to Manuscript, Bibliography, etc)
 		if (!in_array($params['by'], array('chapter','publicationFormat','component','fileExtension','genre'))) {
 			error_log('Smarty: {pluck_files} function called without a valid `by` param. Called in ' . __FILE__ . ':' . __LINE__);
-			return array();
+			$smarty->assign($params['assign'], array());
+			return;
 		}
 
 		// The value to match against. See docs for `by` param
 		if (!isset($params['value'])) {
 			error_log('Smarty: {pluck_files} function called without required `value` param. Called in ' . __FILE__ . ':' . __LINE__);
-			return array();
-		}
-
-		// The variable to assign the result to.
-		if (empty($params['assign'])) {
-			error_log('Smarty: {pluck_files} function called without required `assign` param. Called in ' . __FILE__ . ':' . __LINE__);
-			return array();
+			$smarty->assign($params['assign'], array());
+			return;
 		}
 
 		$matching_files = array();

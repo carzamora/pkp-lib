@@ -3,8 +3,8 @@
 /**
  * @file controllers/wizard/fileUpload/form/PKPSubmissionFilesUploadBaseForm.inc.php
  *
- * Copyright (c) 2014-2017 Simon Fraser University
- * Copyright (c) 2003-2017 John Willinsky
+ * Copyright (c) 2014-2018 Simon Fraser University
+ * Copyright (c) 2003-2018 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @class PKPSubmissionFilesUploadBaseForm
@@ -265,7 +265,7 @@ class PKPSubmissionFilesUploadBaseForm extends Form {
 
 		// Show ensuring a blind review link.
 		$context = $request->getContext();
-		if ($context->getSetting('showEnsuringLink')) {
+		if ($context->getSetting('showEnsuringLink') && in_array($this->getStageId(), array(WORKFLOW_STAGE_ID_SUBMISSION, WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW))) {
 			import('lib.pkp.classes.linkAction.request.ConfirmationModal');
 			$ensuringLink = new LinkAction(
 				'addUser',
